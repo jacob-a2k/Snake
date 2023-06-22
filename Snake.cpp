@@ -7,6 +7,7 @@ void drawBoard(char board[][120]);
 void fillBoard(char board[][120]);
 void doMove(char board[][120], char snakeHead);
 bool isEmptyCell(char board[][120], int row, int column);
+bool isUserChooseCorrectDirection(char choosenDirection, char actualDirection);
 
 int main() {
 	char board[30][120];
@@ -49,7 +50,8 @@ void doMove(char board[][120], char snakeHead) {
 	int x = 10;
 	int y = 10;
 	int error = 1;
-	char direction = 'd';
+	char choosenDirection = 'd';
+	char actualDirection = 'd';
 
 	while (error) {
 		Sleep(100);
@@ -58,46 +60,53 @@ void doMove(char board[][120], char snakeHead) {
 		drawBoard(board);
 
 		if (_kbhit()) {
-			direction = _getch();
+			choosenDirection = _getch();
 		}
-		switch (direction) {
-		case 'd': {
-			board[x][y++] = ' ';
-			if (!isEmptyCell(board, x, y)) {
+		if (isUserChooseCorrectDirection(choosenDirection, actualDirection)) {
+			switch (choosenDirection) {
+			case 'd': {
+				board[x][y++] = ' ';
+				if (!isEmptyCell(board, x, y)) {
+					error = 0;
+				}
+				board[x][y] = snakeHead;
+			}
+					break;
+			case 'a': {
+				board[x][y--] = ' ';
+				if (!isEmptyCell(board, x, y)) {
+					error = 0;
+				}
+				board[x][y] = snakeHead;
+			}
+					break;
+			case 's': {
+				board[x++][y] = ' ';
+				if (!isEmptyCell(board, x, y)) {
+					error = 0;
+				}
+				board[x][y] = snakeHead;
+			}
+					break;
+			case 'w': {
+				board[x--][y] = ' ';
+				if (!isEmptyCell(board, x, y)) {
+					error = 0;
+				}
+				board[x][y] = snakeHead;
+			}
+					break;
+			default: {
+				std::cout << "Smieszki heheszki :)\n";
 				error = 0;
 			}
-			board[x][y] = snakeHead;
-		}
-				break;
-		case 'a': {
-			board[x][y--] = ' ';
-			if (!isEmptyCell(board, x, y)) {
-				error = 0;
 			}
-			board[x][y] = snakeHead;
+			actualDirection = choosenDirection;
 		}
-				break;
-		case 's': {
-			board[x++][y] = ' ';
-			if (!isEmptyCell(board, x, y)) {
-				error = 0;
-			}
-			board[x][y] = snakeHead;
+		else {
+			choosenDirection = actualDirection;
 		}
-				break;
-		case 'w': {
-			board[x--][y] = ' ';
-			if (!isEmptyCell(board, x, y)) {
-				error = 0;
-			}
-			board[x][y] = snakeHead;
-		}
-				break;
-		default: {
-			std::cout << "Smieszki heheszki :)\n";
-			error = 0;
-		}
-		}
+
 	}
 	system("cls");
 	drawBoard(board);
@@ -107,4 +116,13 @@ bool isEmptyCell(char board[][120], int row, int column) {
 		return true;
 	}
 	return false;
+}
+bool isUserChooseCorrectDirection(char choosenDirection, char actualDirection) {
+	if (actualDirection == 'd' && choosenDirection == 'a' ||
+		actualDirection == 'a' && choosenDirection == 'd' ||
+		actualDirection == 's' && choosenDirection == 'w' ||
+		actualDirection == 'w' && choosenDirection == 's' ) {
+		return false;
+	}
+	return true;
 }
