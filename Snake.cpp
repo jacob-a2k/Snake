@@ -1,65 +1,21 @@
+
 #include <iostream>
-#include <windows.h>
+#include <Windows.h>
 #include <conio.h>
 
-void fillBoard(char board[][120]);
 void drawBoard(char board[][120]);
+void fillBoard(char board[][120]);
+void doMove(char board[][120], char snakeHead);
+bool isEmptyCell(char board[][120], int row, int column);
 
-int main()
-{
-	char array[30][120];
-	for (int i = 0; i < 30; ++i) {
-		for (int j = 0; j < 120; ++j) {
-			array[i][j] = ' ';
-		}
-	}
-	int x = 10;
-	int y = 10;
+int main() {
+	char board[30][120];
+	fillBoard(board);
+	drawBoard(board);
+
 	char snakeHead = 'o';
-	array[x][y] = snakeHead;
-	int error = 1;
-	char direction = 'd';
-
-	// try to use kbhit();
-	while (error) {
-		Sleep(100);
-		system("cls");
-		for (int i = 0; i < 30; ++i) {
-			for (int j = 0; j < 120; ++j) {
-				std::cout << array[i][j];
-			}
-			std::cout << "\n";
-		}
-		if (_kbhit()) {
-			direction = _getch();
-		}
-		switch (direction) {
-		case 'd': {
-			array[x][y++] = ' ';
-			array[x][y] = snakeHead;
-		}
-				break;
-		case 'a': {
-			array[x][y--] = ' ';
-			array[x][y] = snakeHead;
-		}
-				break;
-		case 's': {
-			array[x++][y] = ' ';
-			array[x][y] = snakeHead;
-		}
-				break;
-		case 'w': {
-			array[x--][y] = ' ';
-			array[x][y] = snakeHead;
-		}
-				break;
-		default: {
-			std::cout << "Smieszki heheszki :)\n";
-			error = 0;
-		}
-		}
-	}
+	board[10][10] = snakeHead;
+	doMove(board, snakeHead);
 
 }
 void fillBoard(char board[][120]) {
@@ -89,7 +45,66 @@ void drawBoard(char board[][120]) {
 		std::cout << '\n';
 	}
 }
-void moveToNextRightCell(char board[][120], int x, int y) {
-	board[x][y] = ' ';
-	board[x][y + 1] = 'o';
+void doMove(char board[][120], char snakeHead) {
+	int x = 10;
+	int y = 10;
+	int error = 1;
+	char direction = 'd';
+
+	while (error) {
+		Sleep(100);
+		system("cls");
+
+		drawBoard(board);
+
+		if (_kbhit()) {
+			direction = _getch();
+		}
+		switch (direction) {
+		case 'd': {
+			board[x][y++] = ' ';
+			if (!isEmptyCell(board, x, y)) {
+				error = 0;
+			}
+			board[x][y] = snakeHead;
+		}
+				break;
+		case 'a': {
+			board[x][y--] = ' ';
+			if (!isEmptyCell(board, x, y)) {
+				error = 0;
+			}
+			board[x][y] = snakeHead;
+		}
+				break;
+		case 's': {
+			board[x++][y] = ' ';
+			if (!isEmptyCell(board, x, y)) {
+				error = 0;
+			}
+			board[x][y] = snakeHead;
+		}
+				break;
+		case 'w': {
+			board[x--][y] = ' ';
+			if (!isEmptyCell(board, x, y)) {
+				error = 0;
+			}
+			board[x][y] = snakeHead;
+		}
+				break;
+		default: {
+			std::cout << "Smieszki heheszki :)\n";
+			error = 0;
+		}
+		}
+	}
+	system("cls");
+	drawBoard(board);
+}
+bool isEmptyCell(char board[][120], int row, int column) {
+	if (board[row][column] == ' ') {
+		return true;
+	}
+	return false;
 }
