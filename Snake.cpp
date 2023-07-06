@@ -1,128 +1,77 @@
-
+﻿
 #include <iostream>
-#include <Windows.h>
-#include <conio.h>
 
-void drawBoard(char board[][120]);
-void fillBoard(char board[][120]);
-void doMove(char board[][120], char snakeHead);
-bool isEmptyCell(char board[][120], int row, int column);
-bool isUserChooseCorrectDirection(char choosenDirection, char actualDirection);
-
-int main() {
-	char board[30][120];
-	fillBoard(board);
-	drawBoard(board);
-
-	char snakeHead = 'o';
-	board[10][10] = snakeHead;
-	doMove(board, snakeHead);
-
-}
-void fillBoard(char board[][120]) {
-	board[0][0] = '+';
-	for (int i = 1; i < 119; ++i) {
-		board[0][i] = '-';
+class Node {
+	char partOfSnake;
+	Node* next;
+public:
+	Node(char part = 'o', Node* next = nullptr) : partOfSnake(part), next(next) {}
+	Node* getNext() const {
+		return next;
 	}
-	board[0][119] = '+';
+	void fillNext(Node* newNext) { this->next = newNext; }
+};
+
+class Snake {
+	Node* head;
+	Node* tail;
+public:
+	Snake(Node* head = nullptr, Node* tail = nullptr) : head(head), tail(tail) {}
+	void fillhead(Node* newHead) { this->head = newHead; }
+	void filltail(Node* newTail) { this->tail = newTail; }
+	Node* getHead() const {
+		return head;
+	}
+	Node* getTail() const {
+		return tail;
+	}
+};
+
+class Map {
+	char map[30][120];
+public:
+	Map();
+	void refillMap(char newMap[][120]);
+	void printMap(char actualMap[][120]);
+};
+Map::Map() {
+	map[0][0] = '+';
+	for (int i = 1; i < 119; ++i) {
+		map[0][i] = '-';
+	}
+	map[0][119] = '+';
 	for (int j = 1; j < 29; ++j) {
-		board[j][0] = '|';
+		map[j][0] = '|';
 		for (int i = 1; i < 119; ++i) {
-			board[j][i] = ' ';
+			map[j][i] = ' ';
 		}
-		board[j][119] = '|';
+		map[j][119] = '|';
 	}
-	board[29][0] = '+';
+	map[29][0] = '+';
 	for (int i = 1; i < 119; ++i) {
-		board[29][i] = '-';
+		map[29][i] = '-';
 	}
-	board[29][119] = '+';
+	map[29][119] = '+';
 }
-void drawBoard(char board[][120]) {
+void Map::refillMap(char newMap[][120]) {
+	for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 120; j++) {
+			map[i][j] = newMap[i][j];
+		}
+	}
+}
+void Map::printMap(char actualMap[][120]) {
 	for (int i = 0; i < 30; ++i) {
 		for (int j = 0; j < 120; ++j) {
-			std::cout << board[i][j];
+			std::cout << actualMap[i][j];
 		}
 		std::cout << '\n';
 	}
 }
-void doMove(char board[][120], char snakeHead) {
-	int x = 10;
-	int y = 10;
-	int error = 1;
-	char choosenDirection = 'd';
-	char actualDirection = 'd';
 
-	while (error) {
-		Sleep(100);
-		system("cls");
+int main() {
 
-		drawBoard(board);
+	Snake snake_ptr;
 
-		if (_kbhit()) {
-			choosenDirection = _getch();
-		}
-		if (isUserChooseCorrectDirection(choosenDirection, actualDirection)) {
-			switch (choosenDirection) {
-			case 'd': {
-				board[x][y++] = ' ';
-				if (!isEmptyCell(board, x, y)) {
-					error = 0;
-				}
-				board[x][y] = snakeHead;
-			}
-					break;
-			case 'a': {
-				board[x][y--] = ' ';
-				if (!isEmptyCell(board, x, y)) {
-					error = 0;
-				}
-				board[x][y] = snakeHead;
-			}
-					break;
-			case 's': {
-				board[x++][y] = ' ';
-				if (!isEmptyCell(board, x, y)) {
-					error = 0;
-				}
-				board[x][y] = snakeHead;
-			}
-					break;
-			case 'w': {
-				board[x--][y] = ' ';
-				if (!isEmptyCell(board, x, y)) {
-					error = 0;
-				}
-				board[x][y] = snakeHead;
-			}
-					break;
-			default: {
-				std::cout << "Smieszki heheszki :)\n";
-				error = 0;
-			}
-			}
-			actualDirection = choosenDirection;
-		}
-		else {
-			choosenDirection = actualDirection;
-		}
 
-	}
-	system("cls");
-	drawBoard(board);
-}
-bool isEmptyCell(char board[][120], int row, int column) {
-	if (board[row][column] == ' ') {
-		return true;
-	}
-	return false;
-}
-bool isUserChooseCorrectDirection(char choosenDirection, char actualDirection) {
-	if (actualDirection == 'd' && choosenDirection == 'a' ||
-		actualDirection == 'a' && choosenDirection == 'd' ||
-		actualDirection == 's' && choosenDirection == 'w' ||
-		actualDirection == 'w' && choosenDirection == 's' ) {
-		return false;
-	}
-	return true;
 }
