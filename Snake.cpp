@@ -1,96 +1,30 @@
-﻿#include <iostream>
+﻿
+#include <iostream>
 #include <conio.h>
 #include <Windows.h>
 
 class Point {
-public:
 	int x;
 	int y;
-	Point(int x = NULL, int y = NULL) : x(x), y(y){}
+public:
+	Point(int x = NULL, int y = NULL) : x(x), y(y) {}
+	int getX() const { return x; }
+	int getY() const { return y; }
+	void setX(int number) { this->x = number; }
+	void setY(int number) { this->y = number; }
 };
 
-void fillMap(char gameMap[][120]);
-void printMap(char gameMap[][120]);
-
-int main() {
-
+class Map {
 	Point coordinate[3600];
 	char gameMap[30][120];
-	fillMap(gameMap);
-	int snakeSize = 10;
-	char partOfSnake = 'o';
-
-	int nextXpos = 10;
-	int nextYpos = 10;
-	int tmpPosX = nextXpos;
-	int tmpPosY = nextYpos;
-
-	coordinate[0].x = nextXpos;
-	coordinate[0].y = nextYpos;
-
-	char direction = 'd';
-	bool error = false;
-
-	int XposBeforeLoop;
-	int YposBeforeLoop;
-	int tmpX;
-	int tmpY;
-	
-	while (!error) {
-		if (_kbhit()) {
-			direction = _getch();
-		}
-		switch (direction) {
-		case 'd':
-			nextXpos++;
-			break;
-		case 's':
-			nextYpos++;
-			break;
-		case 'w':
-			nextYpos--;
-			break;
-		case 'a':
-			nextXpos--;
-			break;
-		default:
-			std::cout << "Something goes wrong!!!" << std::endl;
-			error = true;
-		}
-		XposBeforeLoop = nextXpos;
-		YposBeforeLoop = nextYpos;
-		
-		for (int i = 0; i < snakeSize; i++) {
-			tmpX = coordinate[i].x;
-			tmpY = coordinate[i].y;
-			gameMap[coordinate[i].y][coordinate[i].x] = ' ';
-			coordinate[i].x = nextXpos;
-			coordinate[i].y = nextYpos;
-			gameMap[coordinate[i].y][coordinate[i].x] = 'o';
-			nextXpos = tmpX;
-			nextYpos = tmpY;
-		}
-		nextXpos = XposBeforeLoop;
-		nextYpos = YposBeforeLoop;
-
-		
-
-		//for (int i = 0; i < snakeSize; i++) {
-		//	tmpPosX = coordinate[i].x;
-		//	tmpPosY = coordinate[i].y;
-		//	gameMap[coordinate[i].y][coordinate[i].x] = ' ';
-		//	coordinate[i].x = nextXpos;
-		//	coordinate[i].y = nextYpos;
-		//	gameMap[coordinate[i].y][coordinate[i].x] = partOfSnake;
-		//}
-		printMap(gameMap);
-		Sleep(50);
-		system("cls");
-	}
-
-	//printMap(gameMap);
-}
-void fillMap(char gameMap[][120]) {
+public:
+	void printMap()const;
+	void fillMap();
+	void setSignInGameMap(int posY, int posX, char sign);
+	char getSignFromGameMap(int posY, int posX) { return gameMap[posY][posX]; }
+	Point* getCoordinate(int number) { return &coordinate[number]; }
+};
+void Map::fillMap() {
 	gameMap[0][0] = '+';
 	for (int i = 1; i < 119; ++i) {
 		gameMap[0][i] = '-';
@@ -109,11 +43,104 @@ void fillMap(char gameMap[][120]) {
 	}
 	gameMap[29][119] = '+';
 }
-void printMap(char gameMap[][120]) {
+void Map::printMap() const {
 	for (int i = 0; i < 30; i++) {
 		for (int j = 0; j < 120; j++) {
 			std::cout << gameMap[i][j];
 		}
 		std::cout << '\n';
 	}
+}
+void Map::setSignInGameMap(int posY, int posX, char sign) {
+	gameMap[posY][posX] = sign;
+}
+
+bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
+
+int snakeSize = 1;
+char actualDirection = 'd';
+char chosenDirection = actualDirection;
+int nextXpos = 10;
+int nextYpos = 10;
+int prevPosX;
+int prevPosY;
+char food = 'x';
+
+int main() {
+	Map map;
+	map.fillMap();
+	map.getCoordinate(0)->setX(nextXpos);
+	map.getCoordinate(0)->setY(nextYpos);
+
+	bool error = false;
+	int XposBeforeLoop;
+	int YposBeforeLoop;
+
+	srand(time(NULL));
+	int randomRow = rand() % 29 + 1;
+	int randomColumn = rand() % 119 + 1;
+	map.setSignInGameMap(randomRow, randomColumn, food);
+
+	while (!error) {
+		if (_kbhit()) {
+			chosenDirection = _getch();
+		}
+		if (isUserChooseCorrectDirection(chosenDirection, actualDirection)) {
+			switch (chosenDirection) {
+			case 'd':
+				nextXpos++;
+				break;
+			case 's':
+				nextYpos++;
+				break;
+			case 'w':
+				nextYpos--;
+				break;
+			case 'a':
+				nextXpos--;
+				break;
+			default:
+				std::cout << "Something goes wrong!!!" << std::endl;
+				Sleep(1000);
+				error = true;
+			}
+			actualDirection = chosenDirection;
+		}
+		else {
+			chosenDirection = actualDirection;
+		}
+		XposBeforeLoop = nextXpos;
+		YposBeforeLoop = nextYpos;
+		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
+			snakeSize++;
+			randomRow = rand() % 29 + 1;
+			randomColumn = rand() % 119 + 1;
+			map.setSignInGameMap(randomRow, randomColumn, food);
+		}
+		for (int i = 0; i < snakeSize; i++) {
+			prevPosX = map.getCoordinate(i)->getX();
+			prevPosY = map.getCoordinate(i)->getY();
+			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
+			map.getCoordinate(i)->setX(nextXpos);
+			map.getCoordinate(i)->setY(nextYpos);
+			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
+			nextXpos = prevPosX;
+			nextYpos = prevPosY;
+		}
+		nextXpos = XposBeforeLoop;
+		nextYpos = YposBeforeLoop;
+
+		map.printMap();
+		Sleep(100);
+		system("cls");
+	}
+}
+bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection) {
+	if (actualDirection == 'd' && chosenDirection == 'a' ||
+		actualDirection == 'a' && chosenDirection == 'd' ||
+		actualDirection == 's' && chosenDirection == 'w' ||
+		actualDirection == 'w' && chosenDirection == 's') {
+		return false;
+	}
+	return true;
 }
