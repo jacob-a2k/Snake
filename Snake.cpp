@@ -58,6 +58,7 @@ void Map::setSignInGameMap(int posY, int posX, char sign) {
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
 bool isEmptyLocationForFood(Map map, int y, int x);
 bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
+bool isUserChoseCorectSign(char dir);
 
 int snakeSize = 1;
 char actualDirection = 'd';
@@ -81,7 +82,7 @@ int main() {
 	srand(time(NULL));
 	int randomRow = rand() % 29 + 1;
 	int randomColumn = rand() % 119 + 1;
-	while (!isEmptyLocationForFood(map,randomRow,randomColumn) ){		// tutaj pracuje na spawnowaniem jedzenia w pusty miejcu mapy
+	while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
 		randomRow = rand() % 29 + 1;
 		randomColumn = rand() % 119 + 1;
 	}
@@ -114,63 +115,73 @@ int main() {
 		}
 		else {
 			chosenDirection = actualDirection;
-		}
-		XposBeforeLoop = nextXpos;
-		YposBeforeLoop = nextYpos;
-		if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
-			error = true;
-			system("cls");
-			std::cout << "\n\n\n";
-			std::cout << "--------GAME OVER--------";
-			Sleep(4000);
 			continue;
 		}
-		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
-			snakeSize++;
+	XposBeforeLoop = nextXpos;
+	YposBeforeLoop = nextYpos;
+	if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
+		error = true;
+		system("cls");
+		std::cout << "\n\n\n";
+		std::cout << "--------GAME OVER--------";
+		Sleep(4000);
+		continue;
+	}
+	if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
+		snakeSize++;
+		randomRow = rand() % 29 + 1;
+		randomColumn = rand() % 119 + 1;
+		while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
 			randomRow = rand() % 29 + 1;
 			randomColumn = rand() % 119 + 1;
-			while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
-				randomRow = rand() % 29 + 1;
-				randomColumn = rand() % 119 + 1;
-			}
-			map.setSignInGameMap(randomRow, randomColumn, food);
 		}
-		for (int i = 0; i < snakeSize; i++) {
-			prevPosX = map.getCoordinate(i)->getX();
-			prevPosY = map.getCoordinate(i)->getY();
-			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
-			map.getCoordinate(i)->setX(nextXpos);
-			map.getCoordinate(i)->setY(nextYpos);
-			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
-			nextXpos = prevPosX;
-			nextYpos = prevPosY;
-		}
-		nextXpos = XposBeforeLoop;
-		nextYpos = YposBeforeLoop;
-
-		map.printMap();
-		Sleep(100);
-		system("cls");
+		map.setSignInGameMap(randomRow, randomColumn, food);
 	}
+	for (int i = 0; i < snakeSize; i++) {
+		prevPosX = map.getCoordinate(i)->getX();
+		prevPosY = map.getCoordinate(i)->getY();
+		map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
+		map.getCoordinate(i)->setX(nextXpos);
+		map.getCoordinate(i)->setY(nextYpos);
+		map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
+		nextXpos = prevPosX;
+		nextYpos = prevPosY;
+	}
+	nextXpos = XposBeforeLoop;
+	nextYpos = YposBeforeLoop;
+
+	map.printMap();
+	Sleep(100);
+	system("cls");
+}
 }
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection) {
-	if (actualDirection == 'd' && chosenDirection == 'a' ||
-		actualDirection == 'a' && chosenDirection == 'd' ||
-		actualDirection == 's' && chosenDirection == 'w' ||
-		actualDirection == 'w' && chosenDirection == 's') {
-		return false;
+	if (isUserChoseCorectSign(chosenDirection)) {
+		if (actualDirection == 'd' && chosenDirection == 'a' ||
+			actualDirection == 'a' && chosenDirection == 'd' ||
+			actualDirection == 's' && chosenDirection == 'w' ||
+			actualDirection == 'w' && chosenDirection == 's') {
+			return false;
+		}
+		return true;
 	}
-	return true;
+	return false;
 }
-bool isEmptyLocationForFood(Map map,int y, int x) {
+bool isEmptyLocationForFood(Map map, int y, int x) {
 	if (map.getSignFromGameMap(y, x) == ' ') {
 		return true;
 	}
 	return false;
 }
-bool isSnakeHitTheWallOrEatHisTail(Map map,int y, int x) {
-	if (map.getSignFromGameMap(y, x) == '|' || map.getSignFromGameMap(y,x) == '-' ||
+bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x) {
+	if (map.getSignFromGameMap(y, x) == '|' || map.getSignFromGameMap(y, x) == '-' ||
 		map.getSignFromGameMap(y, x) == 'o') {
+		return true;
+	}
+	return false;
+}
+bool isUserChoseCorectSign(char dir) {
+	if (dir == 'a' || dir == 's' || dir == 'd' || dir == 'w') {
 		return true;
 	}
 	return false;
