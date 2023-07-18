@@ -60,16 +60,28 @@ bool isEmptyLocationForFood(Map map, int y, int x);
 bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
 bool isUserChoseCorectSign(char dir);
 
-int snakeSize = 1;
-char actualDirection = 'd';
-char chosenDirection = actualDirection;
-int nextXpos = 10;
-int nextYpos = 10;
-int prevPosX;
-int prevPosY;
-char food = 'x';
+//int snakeSize = 1;
+//char actualDirection = 'd';
+//char chosenDirection = actualDirection;
+//int nextXpos = 10;
+//int nextYpos = 10;
+//int prevPosX;
+//int prevPosY;
+//char food = 'x';
 
 int main() {
+
+	int snakeSize = 1;
+	char actualDirection = 'd';
+	char chosenDirection = actualDirection;
+	int nextXpos = 10;
+	int nextYpos = 10;
+	int prevPosX;
+	int prevPosY;
+	char food = 'x';
+
+
+
 	Map map;
 	map.fillMap();
 	map.getCoordinate(0)->setX(nextXpos);
