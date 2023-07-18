@@ -56,6 +56,8 @@ void Map::setSignInGameMap(int posY, int posX, char sign) {
 }
 
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
+bool isEmptyLocationForFood(Map map, int y, int x);
+bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
 
 int snakeSize = 1;
 char actualDirection = 'd';
@@ -79,6 +81,10 @@ int main() {
 	srand(time(NULL));
 	int randomRow = rand() % 29 + 1;
 	int randomColumn = rand() % 119 + 1;
+	while (!isEmptyLocationForFood(map,randomRow,randomColumn) ){		// tutaj pracuje na spawnowaniem jedzenia w pusty miejcu mapy
+		randomRow = rand() % 29 + 1;
+		randomColumn = rand() % 119 + 1;
+	}
 	map.setSignInGameMap(randomRow, randomColumn, food);
 
 	while (!error) {
@@ -111,10 +117,22 @@ int main() {
 		}
 		XposBeforeLoop = nextXpos;
 		YposBeforeLoop = nextYpos;
+		if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
+			error = true;
+			system("cls");
+			std::cout << "\n\n\n";
+			std::cout << "--------GAME OVER--------";
+			Sleep(4000);
+			continue;
+		}
 		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
 			snakeSize++;
 			randomRow = rand() % 29 + 1;
 			randomColumn = rand() % 119 + 1;
+			while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
+				randomRow = rand() % 29 + 1;
+				randomColumn = rand() % 119 + 1;
+			}
 			map.setSignInGameMap(randomRow, randomColumn, food);
 		}
 		for (int i = 0; i < snakeSize; i++) {
@@ -143,4 +161,17 @@ bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection) {
 		return false;
 	}
 	return true;
+}
+bool isEmptyLocationForFood(Map map,int y, int x) {
+	if (map.getSignFromGameMap(y, x) == ' ') {
+		return true;
+	}
+	return false;
+}
+bool isSnakeHitTheWallOrEatHisTail(Map map,int y, int x) {
+	if (map.getSignFromGameMap(y, x) == '|' || map.getSignFromGameMap(y,x) == '-' ||
+		map.getSignFromGameMap(y, x) == 'o') {
+		return true;
+	}
+	return false;
 }
