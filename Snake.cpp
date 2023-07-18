@@ -121,7 +121,7 @@ int main() {
 	YposBeforeLoop = nextYpos;
 	if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
 		error = true;
-		system("cls");
+		map.printMap();
 		std::cout << "\n\n\n";
 		std::cout << "--------GAME OVER--------";
 		Sleep(4000);
