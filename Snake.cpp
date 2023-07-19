@@ -1,29 +1,59 @@
-﻿
-#include <iostream>
+﻿#include <iostream>
 #include <conio.h>
 #include <Windows.h>
+
+class Map;
+
+class Snake {
+	int snakeSize;
+	Point* head;
+	Point* tail;
+public:
+	Snake(Point* newHead = nullptr, Point* newTail = nullptr, int size = NULL) : head(newHead), tail(newTail), snakeSize(size) {}
+	Point* getHead() { return head; }
+	void setHead(Point* newHead) { this->head = newHead; }
+	Point* getTail() { return tail; }
+	void setTail(Point* newTail) { this->tail = newTail; }
+	void printSnake(Map* map);
+	int getSnakeSize() { return snakeSize; }
+	int increaseSnakeSize() { snakeSize++; }
+};
+void Snake::printSnake(Map* map) {
+	Point* current = new Point;
+	current = this->head;
+	while (current != nullptr) {
+		map->printMap(current->getY(), current->getX());
+		current = current->getNext();
+	}
+}
 
 class Point {
 	int x;
 	int y;
+	Point* next;
 public:
-	Point(int x = NULL, int y = NULL) : x(x), y(y) {}
+	Point(int x = NULL, int y = NULL, Point* next = nullptr) : x(x), y(y) {}
 	int getX() const { return x; }
 	int getY() const { return y; }
 	void setX(int number) { this->x = number; }
 	void setY(int number) { this->y = number; }
+	Point* getNext() { return next; }
+	void setNext(Point* newNext) { next = newNext; }
 };
 
 class Map {
 	Point coordinate[3600];
 	char gameMap[30][120];
 public:
-	void printMap()const;
+	void printMap(int y, int x)const;
 	void fillMap();
 	void setSignInGameMap(int posY, int posX, char sign);
 	char getSignFromGameMap(int posY, int posX) { return gameMap[posY][posX]; }
 	Point* getCoordinate(int number) { return &coordinate[number]; }
 };
+void Map::printMap(int y, int x) const {
+	std::cout << gameMap[y][x];
+}
 void Map::fillMap() {
 	gameMap[0][0] = '+';
 	for (int i = 1; i < 119; ++i) {
@@ -43,54 +73,23 @@ void Map::fillMap() {
 	}
 	gameMap[29][119] = '+';
 }
-void Map::printMap() const {
-	for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 120; j++) {
-			std::cout << gameMap[i][j];
-		}
-		std::cout << '\n';
-	}
-}
 void Map::setSignInGameMap(int posY, int posX, char sign) {
 	gameMap[posY][posX] = sign;
 }
 
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
 bool isEmptyLocationForFood(Map map, int y, int x);
-bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
+bool isSnakeHitTheWallOrEatHisTail(Map map, Snake* snake);
 bool isUserChoseCorectSign(char dir);
 
-//int snakeSize = 1;
-//char actualDirection = 'd';
-//char chosenDirection = actualDirection;
-//int nextXpos = 10;
-//int nextYpos = 10;
-//int prevPosX;
-//int prevPosY;
-//char food = 'x';
-
 int main() {
-
-	int snakeSize = 1;
-	char actualDirection = 'd';
-	char chosenDirection = actualDirection;
-	int nextXpos = 10;
-	int nextYpos = 10;
-	int prevPosX;
-	int prevPosY;
-	char food = 'x';
-
-
-
 	Map map;
 	map.fillMap();
-	map.getCoordinate(0)->setX(nextXpos);
-	map.getCoordinate(0)->setY(nextYpos);
+	map.getCoordinate(0)->setX(10);
+	map.getCoordinate(0)->setY(10);
+	Snake snake;
 
-	bool error = false;
-	int XposBeforeLoop;
-	int YposBeforeLoop;
-
+	char food = 'x';
 	srand(time(NULL));
 	int randomRow = rand() % 29 + 1;
 	int randomColumn = rand() % 119 + 1;
@@ -99,6 +98,14 @@ int main() {
 		randomColumn = rand() % 119 + 1;
 	}
 	map.setSignInGameMap(randomRow, randomColumn, food);
+
+	bool error = false;
+	char actualDirection = 'd';
+	char chosenDirection = actualDirection;
+	int nextXpos = 10;
+	int nextYpos = 10;
+	int XposBeforeLoop;
+	int YposBeforeLoop;
 
 	while (!error) {
 		if (_kbhit()) {
@@ -129,43 +136,44 @@ int main() {
 			chosenDirection = actualDirection;
 			continue;
 		}
-	XposBeforeLoop = nextXpos;
-	YposBeforeLoop = nextYpos;
-	if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
-		error = true;
-		map.printMap();
-		std::cout << "\n\n\n";
-		std::cout << "--------GAME OVER--------";
-		Sleep(4000);
-		continue;
-	}
-	if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
-		snakeSize++;
-		randomRow = rand() % 29 + 1;
-		randomColumn = rand() % 119 + 1;
-		while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
+		if (isSnakeHitTheWallOrEatHisTail(map, &snake)) {
+			error = true;
+			snake.printSnake(&map);
+			std::cout << "\n\n\n";
+			Sleep(4000);
+			continue;
+		}
+		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
+			snake.increaseSnakeSize();
 			randomRow = rand() % 29 + 1;
 			randomColumn = rand() % 119 + 1;
+			while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
+				randomRow = rand() % 29 + 1;
+				randomColumn = rand() % 119 + 1;
+			}
+			map.setSignInGameMap(randomRow, randomColumn, food);
 		}
-		map.setSignInGameMap(randomRow, randomColumn, food);
-	}
-	for (int i = 0; i < snakeSize; i++) {
-		prevPosX = map.getCoordinate(i)->getX();
-		prevPosY = map.getCoordinate(i)->getY();
-		map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
-		map.getCoordinate(i)->setX(nextXpos);
-		map.getCoordinate(i)->setY(nextYpos);
-		map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
-		nextXpos = prevPosX;
-		nextYpos = prevPosY;
-	}
-	nextXpos = XposBeforeLoop;
-	nextYpos = YposBeforeLoop;
+		XposBeforeLoop = nextXpos;
+		YposBeforeLoop = nextYpos;
+		int prevPosX;
+		int prevPosY;
+		for (int i = 0; i < snake.getSnakeSize(); i++) {
+			prevPosX = map.getCoordinate(i)->getX();
+			prevPosY = map.getCoordinate(i)->getY();
+			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
+			map.getCoordinate(i)->setX(nextXpos);
+			map.getCoordinate(i)->setY(nextYpos);
+			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
+			nextXpos = prevPosX;
+			nextYpos = prevPosY;
+		}
+		nextXpos = XposBeforeLoop;
+		nextYpos = YposBeforeLoop;
 
-	map.printMap();
-	Sleep(100);
-	system("cls");
-}
+		snake.printSnake(&map);
+		Sleep(100);
+		system("cls");
+	}
 }
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection) {
 	if (isUserChoseCorectSign(chosenDirection)) {
@@ -185,15 +193,10 @@ bool isEmptyLocationForFood(Map map, int y, int x) {
 	}
 	return false;
 }
-bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x) {
-	if (map.getSignFromGameMap(y, x) == '|' || map.getSignFromGameMap(y, x) == '-' ||
-		map.getSignFromGameMap(y, x) == 'o') {
-		return true;
-	}
-	return false;
-}
-bool isUserChoseCorectSign(char dir) {
-	if (dir == 'a' || dir == 's' || dir == 'd' || dir == 'w') {
+bool isSnakeHitTheWallOrEatHisTail(Map map, Snake* snake) {
+	if (map.getSignFromGameMap(snake->getHead()->getY(), snake->getHead()->getX()) == '|' ||
+		map.getSignFromGameMap(snake->getHead()->getY(), snake->getHead()->getX()) == '-' ||
+		map.getSignFromGameMap(snake->getHead()->getY(), snake->getHead()->getX()) == 'o') {
 		return true;
 	}
 	return false;
