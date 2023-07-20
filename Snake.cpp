@@ -22,15 +22,12 @@ Point Point::operator=(const Point* newPoint) {
 
 class Snake {
 	Point* head;
-	Point* tail;
 public:
 	Snake() {
 		head = new Point(nullptr,10,10);
-		tail = head;
 	}
 	Point* getHead() const { return head; }
 	void setHead(Point* newHead) { head = newHead; }
-	void setTail(Point* newTail) { tail = newTail; }
 };
 
 class Map {
@@ -78,22 +75,16 @@ bool isUserChoseCorectSign(char dir);
 bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
 
 int main() {
-	char actualDirection = 'd';
-	char chosenDirection = actualDirection;
-	int nextXpos = 10;
-	int nextYpos = 10;
-	int prevPosX;
-	int prevPosY;
-	char food = 'x';
 
 	Snake snake;
 	Map map;
-	std::cout << snake.getHead()->getX() << std::endl;
-	std::cout << snake.getHead()->getY() << std::endl;
 
 	bool error = false;
 	int XposBeforeLoop;
 	int YposBeforeLoop;
+	int prevPosX;
+	int prevPosY;
+	char food = 'x';
 
 	srand(time(NULL));
 	int randomRow = rand() % 29 + 1;
@@ -103,7 +94,10 @@ int main() {
 		randomColumn = rand() % 119 + 1;
 	}
 	map.setSignInGameMap(randomRow, randomColumn, food);
-
+	char actualDirection = 'd';
+	char chosenDirection = actualDirection;
+	int nextXpos = 10;
+	int nextYpos = 10;
 	while (!error) {
 		if (_kbhit()) {
 			chosenDirection = _getch();
@@ -143,20 +137,9 @@ int main() {
 			Sleep(4000);
 			continue;
 		}
-		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {		// tu jest problem
-			Point* newPartOfSnake = new Point;
-			newPartOfSnake->setY(nextYpos);
-			newPartOfSnake->setX(nextXpos);
-			newPartOfSnake->setNext(snake.getHead());
-			Point* current = newPartOfSnake;
-			Point* penultimate = nullptr;
-			while (current->getNext() != nullptr) {
-				penultimate = current->getNext();
-				current = current->getNext();
-			}
-			snake.setTail(penultimate);
+		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
+			Point* newPartOfSnake = new Point(snake.getHead(),nextYpos, nextXpos);
 			snake.setHead(newPartOfSnake);
-			delete current;
 
 			randomRow = rand() % 29 + 1;
 			randomColumn = rand() % 119 + 1;
