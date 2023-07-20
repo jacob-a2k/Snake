@@ -77,15 +77,14 @@ bool isEmptyLocationForFood(Map map, int y, int x);
 bool isUserChoseCorectSign(char dir);
 bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
 
-char actualDirection = 'd';
-char chosenDirection = actualDirection;
-int nextXpos = 10;
-int nextYpos = 10;
-int prevPosX;
-int prevPosY;
-char food = 'x';
-
 int main() {
+	char actualDirection = 'd';
+	char chosenDirection = actualDirection;
+	int nextXpos = 10;
+	int nextYpos = 10;
+	int prevPosX;
+	int prevPosY;
+	char food = 'x';
 
 	Snake snake;
 	Map map;
