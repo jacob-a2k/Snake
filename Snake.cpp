@@ -3,35 +3,45 @@
 #include <Windows.h>
 
 class Point {
-	int x;
 	int y;
+	int x;
+	Point* next;
 public:
-	Point(int x = NULL, int y = NULL) : x(x), y(y) {}
+	Point(Point* next = nullptr, int y = NULL, int x = NULL) : next(next), y(y), x(x) {}
 	int getX() const { return x; }
 	int getY() const { return y; }
 	void setX(int number) { this->x = number; }
 	void setY(int number) { this->y = number; }
+	Point operator=(const Point* newPoint);
+	Point* getNext() const { return next; }
+	void setNext(Point* nextPoint) { next = nextPoint; }
 };
+Point Point::operator=(const Point* newPoint) {
+	return Point(this->next = newPoint->next,this->y = newPoint->y, this->x = newPoint->x);
+}
+
 class Snake {
-	int snakeSize;
+	Point* head;
+	Point* tail;
 public:
-	Snake(int size = 1) : snakeSize(size) {}
-	int getSizeOfSnake() const { return snakeSize; }
-	void setSizeOfSnake(int newSize) { snakeSize = newSize; }
-	void increaseSnakeSize() { snakeSize++; }
+	Snake() {
+		head = new Point(nullptr,10,10);
+		tail = head;
+	}
+	Point* getHead() const { return head; }
+	void setHead(Point* newHead) { head = newHead; }
+	void setTail(Point* newTail) { tail = newTail; }
 };
 
 class Map {
-	Point coordinate[3600];
 	char gameMap[30][120];
 public:
+	Map();
 	void printMap()const;
-	void fillMap();
 	void setSignInGameMap(int posY, int posX, char sign);
 	char getSignFromGameMap(int posY, int posX) { return gameMap[posY][posX]; }
-	Point* getCoordinate(int number) { return &coordinate[number]; }
 };
-void Map::fillMap() {
+Map::Map() {
 	gameMap[0][0] = '+';
 	for (int i = 1; i < 119; ++i) {
 		gameMap[0][i] = '-';
@@ -76,11 +86,11 @@ int prevPosY;
 char food = 'x';
 
 int main() {
+
 	Snake snake;
 	Map map;
-	map.fillMap();
-	map.getCoordinate(0)->setX(nextXpos);
-	map.getCoordinate(0)->setY(nextYpos);
+	std::cout << snake.getHead()->getX() << std::endl;
+	std::cout << snake.getHead()->getY() << std::endl;
 
 	bool error = false;
 	int XposBeforeLoop;
@@ -134,8 +144,21 @@ int main() {
 			Sleep(4000);
 			continue;
 		}
-		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
-			snake.increaseSnakeSize();
+		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {		// tu jest problem
+			Point* newPartOfSnake = new Point;
+			newPartOfSnake->setY(nextYpos);
+			newPartOfSnake->setX(nextXpos);
+			newPartOfSnake->setNext(snake.getHead());
+			Point* current = newPartOfSnake;
+			Point* penultimate = nullptr;
+			while (current->getNext() != nullptr) {
+				penultimate = current->getNext();
+				current = current->getNext();
+			}
+			snake.setTail(penultimate);
+			snake.setHead(newPartOfSnake);
+			delete current;
+
 			randomRow = rand() % 29 + 1;
 			randomColumn = rand() % 119 + 1;
 			while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
@@ -144,16 +167,19 @@ int main() {
 			}
 			map.setSignInGameMap(randomRow, randomColumn, food);
 		}
-		for (int i = 0; i < snake.getSizeOfSnake(); i++) {
-			prevPosX = map.getCoordinate(i)->getX();
-			prevPosY = map.getCoordinate(i)->getY();
-			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), ' ');
-			map.getCoordinate(i)->setX(nextXpos);
-			map.getCoordinate(i)->setY(nextYpos);
-			map.setSignInGameMap(map.getCoordinate(i)->getY(), map.getCoordinate(i)->getX(), 'o');
+		Point* current = snake.getHead();
+		while(current != nullptr) {
+			prevPosX = current->getX();
+			prevPosY = current->getY();
+			map.setSignInGameMap(current->getY(), current->getX(), ' ');
+			current->setX(nextXpos);
+			current->setY(nextYpos);
+			map.setSignInGameMap(current->getY(), current->getX(), 'o');
 			nextXpos = prevPosX;
 			nextYpos = prevPosY;
+			current = current->getNext();
 		}
+		delete current;
 		nextXpos = XposBeforeLoop;
 		nextYpos = YposBeforeLoop;
 
