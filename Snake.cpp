@@ -17,17 +17,21 @@ public:
 	void setNext(Point* nextPoint) { next = nextPoint; }
 };
 Point Point::operator=(const Point* newPoint) {
-	return Point(this->next = newPoint->next,this->y = newPoint->y, this->x = newPoint->x);
+	return Point(this->next = newPoint->next, this->y = newPoint->y, this->x = newPoint->x);
 }
 
 class Snake {
+	int snakeSize;
+	int snakeSpeed;
 	Point* head;
 public:
-	Snake() {
-		head = new Point(nullptr,10,10);
-	}
+	Snake(int size = 1 ,int speed = 100 ): snakeSize(size),snakeSpeed(speed) { head = new Point(nullptr, 10, 10); }
 	Point* getHead() const { return head; }
 	void setHead(Point* newHead) { head = newHead; }
+	void increaseSnakeSize() { snakeSize++; }
+	int getSnakeSize() const { return snakeSize; }
+	void increaseSnakeSpeed() { snakeSpeed = snakeSpeed / 2; }
+	int getSnakeSpeed() const { return snakeSpeed; }
 };
 
 class Map {
@@ -138,7 +142,11 @@ int main() {
 			continue;
 		}
 		if (map.getSignFromGameMap(nextYpos, nextXpos) == food) {
-			Point* newPartOfSnake = new Point(snake.getHead(),nextYpos, nextXpos);
+			snake.increaseSnakeSize();
+			if (snake.getSnakeSize() % 5 == 0) {
+				snake.increaseSnakeSpeed();
+			}
+			Point* newPartOfSnake = new Point(snake.getHead(), nextYpos, nextXpos);
 			snake.setHead(newPartOfSnake);
 
 			randomRow = rand() % 29 + 1;
@@ -150,7 +158,7 @@ int main() {
 			map.setSignInGameMap(randomRow, randomColumn, food);
 		}
 		Point* current = snake.getHead();
-		while(current != nullptr) {
+		while (current != nullptr) {
 			prevPosX = current->getX();
 			prevPosY = current->getY();
 			map.setSignInGameMap(current->getY(), current->getX(), ' ');
@@ -166,7 +174,7 @@ int main() {
 		nextYpos = YposBeforeLoop;
 
 		map.printMap();
-		Sleep(100);
+		Sleep(snake.getSnakeSpeed());
 		system("cls");
 	}
 }
