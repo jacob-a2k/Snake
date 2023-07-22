@@ -25,7 +25,7 @@ class Snake {
 	int snakeSpeed;
 	Point* head;
 public:
-	Snake(int size = 1 ,int speed = 100 ): snakeSize(size),snakeSpeed(speed) { head = new Point(nullptr, 10, 10); }
+	Snake(int size = 1, int speed = 100) : snakeSize(size), snakeSpeed(speed) { head = new Point(nullptr, 10, 10); }
 	Point* getHead() const { return head; }
 	void setHead(Point* newHead) { head = newHead; }
 	void increaseSnakeSize() { snakeSize++; }
@@ -76,7 +76,8 @@ void Map::setSignInGameMap(int posY, int posX, char sign) {
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
 bool isEmptyLocationForFood(Map map, int y, int x);
 bool isUserChoseCorectSign(char dir);
-bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x);
+bool isNextPositionEmpty(Map map, int y, int x);
+void setFoodInNewLocation(Map* map);
 
 int main() {
 
@@ -91,13 +92,8 @@ int main() {
 	char food = 'x';
 
 	srand(time(NULL));
-	int randomRow = rand() % 29 + 1;
-	int randomColumn = rand() % 119 + 1;
-	while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
-		randomRow = rand() % 29 + 1;
-		randomColumn = rand() % 119 + 1;
-	}
-	map.setSignInGameMap(randomRow, randomColumn, food);
+	setFoodInNewLocation(&map);
+	
 	char actualDirection = 'd';
 	char chosenDirection = actualDirection;
 	int nextXpos = 10;
@@ -133,7 +129,8 @@ int main() {
 		}
 		XposBeforeLoop = nextXpos;
 		YposBeforeLoop = nextYpos;
-		if (isSnakeHitTheWallOrEatHisTail(map, nextYpos, nextXpos)) {
+
+		if (isNextPositionEmpty(map, nextYpos, nextXpos)) {
 			error = true;
 			map.printMap();
 			std::cout << "\n\n\n";
@@ -149,13 +146,7 @@ int main() {
 			Point* newPartOfSnake = new Point(snake.getHead(), nextYpos, nextXpos);
 			snake.setHead(newPartOfSnake);
 
-			randomRow = rand() % 29 + 1;
-			randomColumn = rand() % 119 + 1;
-			while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
-				randomRow = rand() % 29 + 1;
-				randomColumn = rand() % 119 + 1;
-			}
-			map.setSignInGameMap(randomRow, randomColumn, food);
+			setFoodInNewLocation(&map);
 		}
 		Point* current = snake.getHead();
 		while (current != nullptr) {
@@ -190,13 +181,13 @@ bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection) {
 	}
 	return false;
 }
-bool isEmptyLocationForFood(Map map, int y, int x) {
-	if (map.getSignFromGameMap(y, x) == ' ') {
+bool isEmptyLocationForFood(Map* map, int y, int x) {
+	if (map->getSignFromGameMap(y, x) == ' ') {
 		return true;
 	}
 	return false;
 }
-bool isSnakeHitTheWallOrEatHisTail(Map map, int y, int x) {
+bool isNextPositionEmpty(Map map, int y, int x) {
 	if (map.getSignFromGameMap(y, x) == '|' || map.getSignFromGameMap(y, x) == '-' ||
 		map.getSignFromGameMap(y, x) == 'o') {
 		return true;
@@ -208,4 +199,13 @@ bool isUserChoseCorectSign(char dir) {
 		return true;
 	}
 	return false;
+}
+void setFoodInNewLocation(Map* map) {
+	int randomRow = rand() % 29 + 1;
+	int randomColumn = rand() % 119 + 1;
+	while (!isEmptyLocationForFood(map, randomRow, randomColumn)) {
+		randomRow = rand() % 29 + 1;
+		randomColumn = rand() % 119 + 1;
+	}
+	map->setSignInGameMap(randomRow, randomColumn, 'x');
 }
