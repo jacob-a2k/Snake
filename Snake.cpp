@@ -1,77 +1,9 @@
 ﻿#include <iostream>
 #include <conio.h>
 #include <Windows.h>
-
-class Point {
-	int y;
-	int x;
-	Point* next;
-public:
-	Point(Point* next = nullptr, int y = NULL, int x = NULL) : next(next), y(y), x(x) {}
-	int getX() const { return x; }
-	int getY() const { return y; }
-	void setX(int number) { this->x = number; }
-	void setY(int number) { this->y = number; }
-	Point operator=(const Point* newPoint);
-	Point* getNext() const { return next; }
-	void setNext(Point* nextPoint) { next = nextPoint; }
-};
-Point Point::operator=(const Point* newPoint) {
-	return Point(this->next = newPoint->next, this->y = newPoint->y, this->x = newPoint->x);
-}
-
-class Snake {
-	int snakeSize;
-	int snakeSpeed;
-	Point* head;
-public:
-	Snake(int size = 1, int speed = 100) : snakeSize(size), snakeSpeed(speed) { head = new Point(nullptr, 10, 10); }
-	Point* getHead() const { return head; }
-	void setHead(Point* newHead) { head = newHead; }
-	void increaseSnakeSize() { snakeSize++; }
-	int getSnakeSize() const { return snakeSize; }
-	void increaseSnakeSpeed() { snakeSpeed = snakeSpeed / 2; }
-	int getSnakeSpeed() const { return snakeSpeed; }
-};
-
-class Map {
-	char gameMap[30][120];
-public:
-	Map();
-	void printMap()const;
-	void setSignInGameMap(int posY, int posX, char sign);
-	char getSignFromGameMap(int posY, int posX) { return gameMap[posY][posX]; }
-};
-Map::Map() {
-	gameMap[0][0] = '+';
-	for (int i = 1; i < 119; ++i) {
-		gameMap[0][i] = '-';
-	}
-	gameMap[0][119] = '+';
-	for (int j = 1; j < 29; ++j) {
-		gameMap[j][0] = '|';
-		for (int i = 1; i < 119; ++i) {
-			gameMap[j][i] = ' ';
-		}
-		gameMap[j][119] = '|';
-	}
-	gameMap[29][0] = '+';
-	for (int i = 1; i < 119; ++i) {
-		gameMap[29][i] = '-';
-	}
-	gameMap[29][119] = '+';
-}
-void Map::printMap() const {
-	for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 120; j++) {
-			std::cout << gameMap[i][j];
-		}
-		std::cout << '\n';
-	}
-}
-void Map::setSignInGameMap(int posY, int posX, char sign) {
-	gameMap[posY][posX] = sign;
-}
+#include "Point.h"
+#include "Snake.h"
+#include "Map.h"
 
 bool isUserChooseCorrectDirection(char chosenDirection, char actualDirection);
 bool isEmptyLocationForFood(Map map, int y, int x);
